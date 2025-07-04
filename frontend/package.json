@@ -1,0 +1,29 @@
+{
+  "name": "complianceagent-frontend",
+  "version": "1.0.0",
+  "description": "医疗数据合规智能体前端",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.0",
+    "axios": "^1.6.0",
+    "naive-ui": "^2.34.4"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^5.0.0"
+  },
+  "dependencies": {
+    "naive-ui": "^2.34.4",
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.0",
+    "axios": "^1.6.0"
+  },
+  "keywords": ["vue", "compliance", "pii", "frontend"],
+  "author": "",
+  "license": "MIT"
+}

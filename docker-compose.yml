@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - presidio-analyzer
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:8080"
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: compliance_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer
+    ports:
+      - "3000:3000"
