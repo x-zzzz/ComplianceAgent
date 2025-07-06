@@ -42,7 +42,7 @@ class PiiDetectView(APIView):
         if file:
             try:
                 extracted_text = self.extract_text_from_file(file)
-                logger.info(extract_text)
+                logger.info(extracted_text)
             except Exception as e:
                 logger.error(f"File parse error: {e}")
                 return Response({"error": "文件解析失败: " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -64,4 +64,17 @@ class PiiDetectView(APIView):
         )
         serializer = PiiDetectionRecordSerializer(record)
         # 返回原文内容，便于前端展示
-        return Response({**serializer.data, "text": extracted_text, "raw_response": result.get("raw_response")}, status=status.HTTP_201_CREATED)
+        # 直接返回 deepseek summary 字段内容，全部顶层展开
+        from .knowledge_lookup import find_knowledge_explanation
+        summary = result.get("summary", {})
+        overall_reason = summary.get("overall_reason", "")
+        knowledge_explanation = find_knowledge_explanation(overall_reason)
+        return Response({
+            "total_entities": summary.get("total_entities", 0),
+            "risk_level": summary.get("risk_level", "未知"),
+            "overall_reason": overall_reason,
+            "overall_reason_explanation": knowledge_explanation,
+            "details": result.get("details", []),
+            "raw_response": result.get("raw_response"),
+            "text": extracted_text
+        }, status=status.HTTP_201_CREATED)
