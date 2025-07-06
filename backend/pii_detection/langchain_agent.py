@@ -1,24 +1,16 @@
-from .presidio_client import analyze_text
+from .langchain_chain import langchain_deepseek_chain
 
-def detect_pii_and_risk(text):
-    results = analyze_text(text)
-    pii_entities = []
-    risk_level = "Low"
-    for entity in results:
-        entity_type = entity.get("entity_type")
-        score = entity.get("score", 0)
-        # 简单风险分级
-        if entity_type in ["CreditCard", "BankAccount", "SSN"]:
-            risk_level = "High"
-        elif entity_type in ["PhoneNumber", "Email"]:
-            risk_level = "Medium"
-        pii_entities.append({
-            "type": entity_type,
-            "start": entity.get("start"),
-            "end": entity.get("end"),
-            "score": score
-        })
+def detect_pii_and_risk(text, knowledge_base_prompt=None):
+    """
+    用 LangChain 构建 prompt，调用 deepseek 检测。
+    返回格式需与前端兼容：{"entities": [...], "risk_level": ...}
+    """
+    result = langchain_deepseek_chain(text, knowledge_base_prompt)
+    # 适配 deepseek 返回格式
+    if isinstance(result, dict) and "entities" in result and "risk_level" in result:
+        return result
     return {
-        "entities": pii_entities,
-        "risk_level": risk_level
+        "entities": [],
+        "risk_level": "未知",
+        "raw_response": result
     }
