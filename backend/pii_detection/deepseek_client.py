@@ -1,14 +1,19 @@
 import logging
 from openai import OpenAI
 import json
+import os
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
 DEEPSEEK_API_URL = "https://api.deepseek.com"
-DEEPSEEK_API_KEY = "sk-e752a0d356314ce1bd5d8d595797340a"  # 如有鉴权需求
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")  # 从环境变量读取
 
 # 注意：format字符串中如有大括号需转义
 DEEPSEEK_PROMPT_TEMPLATE = '''你是一个医疗敏感个人信息检测助手，请严格根据知识库规则识别文本中的敏感个人信息。\n请以如下JSON格式返回：\n{{\n  "summary": {{\n    "total_entities": 敏感信息总数（整数）, \n    "risk_level": "高|中|低|未知", \n    "overall_reason": "整体风险说明，需简明扼要，引用知识库相关内容"\n  }},\n  "details": [\n    {{\n      "entities": ["实体1", "实体2", ...],\n      "risk_level": "高|中|低|未知",\n      "reason": "该条敏感信息的合规说明，引用知识库相关内容"\n    }},\n    ...\n  ]\n}}\n只返回JSON字符串，不要有多余解释。待检测文本如下：\n{input_text}'''
+
+# 加载 .env 文件
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 def deepseek_detect(text, knowledge_base_prompt=None):
     """
