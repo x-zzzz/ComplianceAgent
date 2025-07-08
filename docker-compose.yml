@@ -8,6 +8,8 @@ services:
     depends_on:
       - db
       - presidio-analyzer
+    env_file:
+      - backend/.env
   frontend:
     build:
       context: ./
