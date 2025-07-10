@@ -1,112 +1,31 @@
 <template>
-  <div class="gpt-root">
+  <div class="gpt-root chatgpt-style-bg">
     <aside class="gpt-sidebar">
       <div class="gpt-sidebar-header">
-        <img src="../assets/lock.svg" alt="lock" class="gpt-logo" />
-        <span class="gpt-title">医疗数据合规智能体</span>
+        <img src="../assets/compliance_bot.svg" alt="compliance bot" class="gpt-logo" />
+        <span class="gpt-title" style="display: flex; align-items: center; gap: 8px;">
+          合规小助手
+        </span>
       </div>
       <nav class="gpt-menu">
         <div v-for="item in menuOptions" :key="item.key" :class="['gpt-menu-item', {active: activeMenu === item.key}]" @click="activeMenu = item.key">
-          {{ item.label }}
+          <img :src="item.icon" :alt="item.label + ' icon'" class="gpt-menu-icon" />
+          <span>{{ item.label }}</span>
         </div>
       </nav>
     </aside>
-    <main class="gpt-main">
-      <header class="gpt-main-header">
-        <span class="gpt-main-title">个人信息检测与风险评估</span>
+    <main class="gpt-main chatgpt-main">
+      <header class="gpt-main-header chatgpt-header">
+        <span class="gpt-main-title chatgpt-title-main">个人信息检测与风险评估</span>
       </header>
-      <section class="gpt-chat-section">
-        <div class="gpt-chat-center">
-          <div class="gpt-feature-title">
-            <n-icon size="40" color="#409eff" style="vertical-align: middle; margin-right: 10px;">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#409eff"/></svg>
-            </n-icon>
-            <span class="gpt-feature-title-text">智能检测医疗文本中的敏感信息与风险</span>
-          </div>
-          <div class="gpt-feature-desc">本功能可自动识别医疗文本中的敏感个人信息，并评估其风险等级，助力数据合规。</div>
-          <div class="gpt-input-area-adaptive">
-            <n-input
-              v-model:value="text"
-              type="textarea"
-              :autosize="{ minRows: 4, maxRows: 8 }"
-              placeholder="请输入待检测文本..."
-              :disabled="loading"
-              class="gpt-input gpt-input-rounded"
-            />
-          </div>
-          <div class="gpt-action-bar">
-            <n-upload
-              :custom-request="handleFileUpload"
-              :show-file-list="false"
-              accept=".txt,.pdf,.doc,.docx"
-              :disabled="loading"
-            >
-              <n-button quaternary circle size="large" class="gpt-upload-btn" :loading="loading">
-                <n-icon size="24"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke="#409eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="16" width="16" height="4" rx="2" fill="#409eff"/></svg></n-icon>
-              </n-button>
-            </n-upload>
-            <n-button type="primary" size="large" class="gpt-detect-btn" :loading="loading" :disabled="!text && !fileContent" @click="detectPIIHandler">
-              <n-icon size="24" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></n-icon>
-              检测
-            </n-button>
-          </div>
-          <div class="gpt-upload-tip">支持上传 .txt/.pdf/.doc/.docx 文件，或直接粘贴文本</div>
-          <div v-if="fileContent" class="gpt-file-preview">
-            <n-input
-              v-model:value="fileContent"
-              type="textarea"
-              :autosize="{ minRows: 2, maxRows: 6 }"
-              placeholder="文件内容将显示在此处"
-              :disabled="true"
-              class="gpt-input"
-            />
-          </div>
-
-          <!-- 检测结果总览，直接展开显示 -->
-          <div v-if="result && result.total_entities !== undefined" class="gpt-pii-summary gpt-pii-summary-unfold">
-            <div class="gpt-summary-row">
-              <span>发现敏感个人信息总数：</span>
-              <b>{{ result.total_entities }}</b>
-            </div>
-            <div class="gpt-summary-row">
-              <span>整体风险等级：</span>
-              <b :class="['risk', result.risk_level]">{{ result.risk_level }}</b>
-            </div>
-            <div class="gpt-summary-row">
-              <span>合规风险说明：</span>
-              <span class="gpt-summary-reason">{{ result.overall_reason }}</span>
-            </div>
-          </div>
-
-          <n-collapse v-if="result && result.details && result.details.length" class="gpt-pii-collapse" accordion>
-            <n-collapse-item v-for="(item, idx) in result.details" :key="idx" :title="'敏感信息 ' + (idx+1)">
-              <div class="entities">
-                <b>敏感信息内容：</b>
-                <ul>
-                  <li v-for="(e, i) in item.entities" :key="i">{{ e }}</li>
-                </ul>
-              </div>
-              <div>
-                <b>风险等级：</b>
-                <span :class="['risk', item.risk_level]">{{ item.risk_level }}</span>
-              </div>
-              <div>
-                <b>合规说明：</b>
-                <span class="gpt-summary-reason">{{ item.reason }}</span>
-              </div>
-            </n-collapse-item>
-          </n-collapse>
-
-          <div v-if="result && result.details && !result.details.length" style="text-align:center;color:#aaa;margin-top:32px;">
-            未检测到敏感个人信息。
-          </div>
-
-          <!-- 原始内容调试展示（可選） -->
-          <n-collapse v-if="result && result.raw_response && result.raw_response.content" class="gpt-pii-collapse" style="margin-top:18px;">
-            <n-collapse-item title="原始检测内容（调试用）">
-              <pre style="white-space:pre-wrap;word-break:break-all;font-size:0.98rem;color:#888;background:#f8fafc;padding:12px 16px;border-radius:8px;">{{ result.raw_response.content }}</pre>
-            </n-collapse-item>
-          </n-collapse>
+      <section class="gpt-chat-section chatgpt-chat-section">
+        <div class="gpt-chat-center chatgpt-chat-center">
+          <template v-if="activeMenu === 'pii'">
+            <PiiDetectPanel />
+          </template>
+          <template v-else-if="activeMenu === 'desensitize'">
+            <DesensitizePanel />
+          </template>
         </div>
       </section>
     </main>
@@ -115,65 +34,22 @@
 
 <script setup>
 import { ref } from 'vue';
-import { NCard, NSpace, NInput, NButton, NForm, NFormItem, NAlert, NDivider, NList, NListItem, NTag, NUpload, NTabs, NTabPane, NMenu, NIcon, NCollapse, NCollapseItem } from 'naive-ui';
-import { detectPII } from '../api/pii';
+import PiiDetectPanel from './PiiDetectPanel.vue';
+import DesensitizePanel from './DesensitizePanel.vue';
 
-const text = ref('');
-const fileContent = ref('');
-const result = ref(null);
-const loading = ref(false);
 const activeMenu = ref('pii');
 const menuOptions = [
-  { label: 'PII检测', key: 'pii' },
-  { label: '脱敏处理', key: 'desensitize' },
-  { label: '敏感词扫描', key: 'sensitive_words' },
-  { label: '合规风险评估', key: 'risk_assess' },
-  { label: '合规知识库问答', key: 'qa' },
-  { label: '合规报告生成', key: 'report' },
-  { label: '数据合规建议', key: 'advice' },
-  { label: '日志与历史记录', key: 'history' },
-  { label: '系统设置', key: 'settings' }
+  { label: 'PII检测', key: 'pii', icon: require('../assets/pii.svg') },
+  { label: '脱敏处理', key: 'desensitize', icon: require('../assets/desensitize.svg') },
+  { label: '敏感词扫描', key: 'sensitive_words', icon: require('../assets/sensitive_words.svg') },
+  { label: '合规风险评估', key: 'risk_assess', icon: require('../assets/risk_assess.svg') },
+  { label: '合规知识库问答', key: 'qa', icon: require('../assets/qa.svg') },
+  { label: '合规报告生成', key: 'report', icon: require('../assets/report.svg') },
+  { label: '数据合规建议', key: 'advice', icon: require('../assets/advice.svg') },
+  { label: '日志与历史记录', key: 'history', icon: require('../assets/history.svg') },
+  { label: '系统设置', key: 'settings', icon: require('../assets/settings.svg') }
 ];
-
-async function detectPIIHandler() {
-  if (!text.value) return;
-  loading.value = true;
-  try {
-    const res = await detectPII(text.value);
-    result.value = res.data;
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function handleFileUpload({ file }) {
-  loading.value = true;
-  fileContent.value = '';
-  result.value = null;
-  try {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const content = e.target.result;
-      fileContent.value = content;
-      const res = await detectPII(content);
-      result.value = res.data;
-    };
-    reader.readAsText(file.file);
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function detectFileContent() {
-  if (!fileContent.value) return;
-  loading.value = true;
-  try {
-    const res = await detectPII(fileContent.value);
-    result.value = res.data;
-  } finally {
-    loading.value = false;
-  }
-}
+// ...existing code...
 </script>
 
 <style scoped>
@@ -207,6 +83,13 @@ async function detectFileContent() {
 .gpt-title {
   font-size: 1.3rem;
   font-weight: 600;
+  letter-spacing: 1px;
+}
+.gpt-menu-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  vertical-align: middle;
 }
 .gpt-menu {
   flex: 1;
@@ -383,6 +266,75 @@ async function detectFileContent() {
 }
 .gpt-pii-collapse {
   margin-top: 18px;
+}
+.gpt-desensitize-section {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px #f0f1f3;
+}
+.gpt-desensitize-btn {
+  min-width: 120px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 24px;
+  box-shadow: 0 2px 8px #e0e6ed;
+}
+.gpt-desensitize-result {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.gpt-desensitized-text {
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+/* ChatGPT风格增强 */
+.chatgpt-style-bg {
+  background: #f7f7f8 !important;
+}
+.chatgpt-header {
+  background: #fff;
+  border-bottom: 1px solid #ececec;
+  box-shadow: 0 1px 4px #f0f1f3;
+}
+.chatgpt-title-main {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+}
+.chatgpt-main {
+  background: #f7f7f8;
+}
+.chatgpt-chat-section {
+  background: #f7f7f8;
+}
+.chatgpt-chat-center {
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 0 0 0;
+}
+.gpt-panel-card, .chatgpt-panel-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.04);
+  padding: 32px 36px 28px 36px;
+  margin-bottom: 32px;
+}
+.gpt-chat-bubble, .n-input, .n-card, .n-upload, .n-collapse, .n-collapse-item, .gpt-desensitize-result {
+  border-radius: 18px !important;
+}
+.gpt-desensitize-result {
+  background: #f8fafc;
+  border-radius: 18px !important;
+}
+.gpt-input-rounded {
+  border-radius: 18px !important;
 }
 </style>
 

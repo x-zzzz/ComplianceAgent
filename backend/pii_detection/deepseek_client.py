@@ -10,7 +10,7 @@ DEEPSEEK_API_URL = "https://api.deepseek.com"
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")  # 从环境变量读取
 
 # 更有逻辑和合规依据的 prompt（全简体）
-DEEPSEEK_PROMPT_TEMPLATE = '''你是一名医疗敏感个人信息合规检测专家，请根据下方知识库规则，对输入文本进行合规性分析，步骤如下：\n\n1. 先判断文本中是否存在敏感个人信息，仅在明确违规或高风险时才标注为敏感，避免过度检出。\n2. 对每一条检出的敏感信息，根据知识库规则，给出具体的合规依据、风险等级（高/中/低/未知），并简明说明判断理由，需引用规则内容。\n3. 最后，对整体文本的合规风险进行总结，并给出简要说明与规则依据。\n\n请严格按照以下 JSON 格式返回（只返回 JSON，无需多余解释）：\n\n{{\n  "summary": {{\n    "total_entities": 敏感信息总数（整数）,\n    "risk_level": "高|中|低|未知",\n    "overall_reason": "整体合规风险说明，需简明扼要，引用知识库相关内容"\n  }},\n  "details": [\n    {{\n      "entities": ["实体1", "实体2", ...],\n      "risk_level": "高|中|低|未知",\n      "reason": "该条敏感信息的合规判断依据与说明，需引用知识库内容"\n    }}\n    // ...如有多条，继续列出\n  ]\n}}\n\n待检测文本如下：\n{input_text}'''
+DEEPSEEK_PROMPT_TEMPLATE = '''你是一名医疗敏感个人信息合规检测专家，请根据下方知识库规则，对输入文本进行合规性分析，步骤如下：\n\n1. 先判断文本中是否存在敏感个人信息。\n2. 对每一条检出的敏感信息，根据知识库规则，给出具体的合规依据、风险等级（高/中/低/未知），并根据知识库内容说明判断理由，需引用规则内容。\n3. 最后，对整体文本的合规风险进行总结，并给出说明与规则依据。\n\n请严格按照以下 JSON 格式返回（只返回 JSON）：\n\n{{\n  "summary": {{\n    "total_entities": 敏感信息总数（整数）,\n    "risk_level": "高|中|低|未知",\n    "overall_reason": "整体合规风险说明，引用知识库相关内容"\n  }},\n  "details": [\n    {{\n      "entities": ["实体1", "实体2", ...],\n      "risk_level": "高|中|低|未知",\n      "reason": "该条敏感信息的合规判断依据与说明，需引用知识库内容"\n    }}\n    // ...如有多条，继续列出\n  ]\n}}\n\n待检测文本如下：\n{input_text}'''
 
 # 加载 .env 文件
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))

@@ -1,3 +1,9 @@
+export function desensitizePII(text, entities = null) {
+  return axios.post('/api/pii/desensitize/', {
+    text,
+    ...(entities ? { entities } : {})
+  });
+}
 import axios from 'axios';
 
 export function detectPII(data, isFormData = false) {
