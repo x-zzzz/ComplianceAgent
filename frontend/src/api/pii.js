@@ -1,13 +1,26 @@
+export function desensitizePII(text, entities = null) {
+  return axios.post('/api/pii/desensitize/', {
+    text,
+    ...(entities ? { entities } : {})
+  });
+}
 import axios from 'axios';
 
-export function detectPII(data, isFormData = false) {
-  if (isFormData) {
-    return axios.post('/api/pii/detect/', data, {
+export function detectPII(data, model = 'presidio') {
+  let requestData;
+  if (data instanceof FormData) {
+    requestData = data;
+    requestData.append('model', model);
+    return axios.post('/api/pii/detect/', requestData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
   } else {
-    return axios.post('/api/pii/detect/', { text: data });
+    requestData = {
+      text: data,
+      model: model
+    };
+    return axios.post('/api/pii/detect/', requestData);
   }
 }

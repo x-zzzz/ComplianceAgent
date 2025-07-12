@@ -2,111 +2,49 @@
   <div class="gpt-root">
     <aside class="gpt-sidebar">
       <div class="gpt-sidebar-header">
-        <img src="../assets/lock.svg" alt="lock" class="gpt-logo" />
-        <span class="gpt-title">医疗数据合规智能体</span>
+        <img src="../assets/modern_bot.svg" alt="compliance bot" class="gpt-logo" />
+        <span class="gpt-title">合规智能体</span>
       </div>
       <nav class="gpt-menu">
-        <div v-for="item in menuOptions" :key="item.key" :class="['gpt-menu-item', {active: activeMenu === item.key}]" @click="activeMenu = item.key">
-          {{ item.label }}
+        <div v-for="item in menuOptions" 
+             :key="item.key" 
+             :class="['gpt-menu-item', { active: activeMenu === item.key }]"
+             @click="handleMenuClick(item)">
+          <img :src="item.icon" :alt="item.label + ' icon'" class="gpt-menu-icon" />
+          <span>{{ item.label }}</span>
         </div>
       </nav>
+      <div class="gpt-sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">AI</div>
+          <span class="user-name">合规助手</span>
+        </div>
+      </div>
     </aside>
     <main class="gpt-main">
       <header class="gpt-main-header">
-        <span class="gpt-main-title">个人信息检测与风险评估</span>
+        <div class="header-content">
+          <h1 class="gpt-main-title">{{ getActiveMenuLabel }}</h1>
+          <div class="header-controls">
+            <button class="theme-toggle" @click="toggleTheme">
+              <svg v-if="isDark" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </header>
       <section class="gpt-chat-section">
         <div class="gpt-chat-center">
-          <div class="gpt-feature-title">
-            <n-icon size="40" color="#409eff" style="vertical-align: middle; margin-right: 10px;">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#409eff"/></svg>
-            </n-icon>
-            <span class="gpt-feature-title-text">智能检测医疗文本中的敏感信息与风险</span>
-          </div>
-          <div class="gpt-feature-desc">本功能可自动识别医疗文本中的敏感个人信息，并评估其风险等级，助力数据合规。</div>
-          <div class="gpt-input-area-adaptive">
-            <n-input
-              v-model:value="text"
-              type="textarea"
-              :autosize="{ minRows: 4, maxRows: 8 }"
-              placeholder="请输入待检测文本..."
-              :disabled="loading"
-              class="gpt-input gpt-input-rounded"
-            />
-          </div>
-          <div class="gpt-action-bar">
-            <n-upload
-              :custom-request="handleFileUpload"
-              :show-file-list="false"
-              accept=".txt,.pdf,.doc,.docx"
-              :disabled="loading"
-            >
-              <n-button quaternary circle size="large" class="gpt-upload-btn" :loading="loading">
-                <n-icon size="24"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke="#409eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="16" width="16" height="4" rx="2" fill="#409eff"/></svg></n-icon>
-              </n-button>
-            </n-upload>
-            <n-button type="primary" size="large" class="gpt-detect-btn" :loading="loading" :disabled="!text && !fileContent" @click="detectPIIHandler">
-              <n-icon size="24" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></n-icon>
-              检测
-            </n-button>
-          </div>
-          <div class="gpt-upload-tip">支持上传 .txt/.pdf/.doc/.docx 文件，或直接粘贴文本</div>
-          <div v-if="fileContent" class="gpt-file-preview">
-            <n-input
-              v-model:value="fileContent"
-              type="textarea"
-              :autosize="{ minRows: 2, maxRows: 6 }"
-              placeholder="文件内容将显示在此处"
-              :disabled="true"
-              class="gpt-input"
-            />
-          </div>
-
-          <!-- 检测结果总览，直接展开显示 -->
-          <div v-if="result && result.total_entities !== undefined" class="gpt-pii-summary gpt-pii-summary-unfold">
-            <div class="gpt-summary-row">
-              <span>发现敏感个人信息总数：</span>
-              <b>{{ result.total_entities }}</b>
-            </div>
-            <div class="gpt-summary-row">
-              <span>整体风险等级：</span>
-              <b :class="['risk', result.risk_level]">{{ result.risk_level }}</b>
-            </div>
-            <div class="gpt-summary-row">
-              <span>合规风险说明：</span>
-              <span class="gpt-summary-reason">{{ result.overall_reason }}</span>
-            </div>
-          </div>
-
-          <n-collapse v-if="result && result.details && result.details.length" class="gpt-pii-collapse" accordion>
-            <n-collapse-item v-for="(item, idx) in result.details" :key="idx" :title="'敏感信息 ' + (idx+1)">
-              <div class="entities">
-                <b>敏感信息内容：</b>
-                <ul>
-                  <li v-for="(e, i) in item.entities" :key="i">{{ e }}</li>
-                </ul>
-              </div>
-              <div>
-                <b>风险等级：</b>
-                <span :class="['risk', item.risk_level]">{{ item.risk_level }}</span>
-              </div>
-              <div>
-                <b>合规说明：</b>
-                <span class="gpt-summary-reason">{{ item.reason }}</span>
-              </div>
-            </n-collapse-item>
-          </n-collapse>
-
-          <div v-if="result && result.details && !result.details.length" style="text-align:center;color:#aaa;margin-top:32px;">
-            未检测到敏感个人信息。
-          </div>
-
-          <!-- 原始内容调试展示（可選） -->
-          <n-collapse v-if="result && result.raw_response && result.raw_response.content" class="gpt-pii-collapse" style="margin-top:18px;">
-            <n-collapse-item title="原始检测内容（调试用）">
-              <pre style="white-space:pre-wrap;word-break:break-all;font-size:0.98rem;color:#888;background:#f8fafc;padding:12px 16px;border-radius:8px;">{{ result.raw_response.content }}</pre>
-            </n-collapse-item>
-          </n-collapse>
+          <template v-if="activeMenu === 'pii'">
+            <PiiDetectPanel />
+          </template>
+          <template v-else-if="activeMenu === 'desensitize'">
+            <DesensitizePanel />
+          </template>
         </div>
       </section>
     </main>
@@ -114,275 +52,313 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { NCard, NSpace, NInput, NButton, NForm, NFormItem, NAlert, NDivider, NList, NListItem, NTag, NUpload, NTabs, NTabPane, NMenu, NIcon, NCollapse, NCollapseItem } from 'naive-ui';
-import { detectPII } from '../api/pii';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import PiiDetectPanel from './PiiDetectPanel.vue';
+import DesensitizePanel from './DesensitizePanel.vue';
 
-const text = ref('');
-const fileContent = ref('');
-const result = ref(null);
-const loading = ref(false);
-const activeMenu = ref('pii');
+const router = useRouter();
+const route = useRoute();
+const isDark = ref(false);
+
 const menuOptions = [
-  { label: 'PII检测', key: 'pii' },
-  { label: '脱敏处理', key: 'desensitize' },
-  { label: '敏感词扫描', key: 'sensitive_words' },
-  { label: '合规风险评估', key: 'risk_assess' },
-  { label: '合规知识库问答', key: 'qa' },
-  { label: '合规报告生成', key: 'report' },
-  { label: '数据合规建议', key: 'advice' },
-  { label: '日志与历史记录', key: 'history' },
-  { label: '系统设置', key: 'settings' }
+  { label: '首页', key: 'home', icon: require('../assets/compliance_bot.svg'), path: '/' },
+  { label: 'PII检测', key: 'pii', icon: require('../assets/pii.svg'), path: '/pii' },
+  { label: '脱敏处理', key: 'desensitize', icon: require('../assets/desensitize.svg'), path: '/pii?tab=desensitize' },
+  { label: '敏感词扫描', key: 'sensitive_words', icon: require('../assets/sensitive_words.svg') },
+  { label: '合规风险评估', key: 'risk_assess', icon: require('../assets/risk_assess.svg') },
+  { label: '合规知识库问答', key: 'qa', icon: require('../assets/qa.svg') },
+  { label: '合规报告生成', key: 'report', icon: require('../assets/report.svg') },
+  { label: '数据合规建议', key: 'advice', icon: require('../assets/advice.svg') },
+  { label: '日志与历史记录', key: 'history', icon: require('../assets/history.svg') },
+  { label: '系统设置', key: 'settings', icon: require('../assets/settings.svg') }
 ];
 
-async function detectPIIHandler() {
-  if (!text.value) return;
-  loading.value = true;
-  try {
-    const res = await detectPII(text.value);
-    result.value = res.data;
-  } finally {
-    loading.value = false;
+const activeMenu = ref('pii');
+
+const getActiveMenuLabel = computed(() => {
+  const item = menuOptions.find(item => item.key === activeMenu.value);
+  return item ? item.label : '';
+});
+
+function toggleTheme() {
+  isDark.value = !isDark.value;
+  document.documentElement.classList.toggle('dark');
+}
+
+function handleMenuClick(item) {
+  if (item.key === 'home') {
+    router.push('/');
+    return;
+  }
+  if (item.path) {
+    router.push(item.path);
+  }
+  // 只在 /pii 路由下切换 tab
+  if (route.path === '/pii' && (item.key === 'pii' || item.key === 'desensitize')) {
+    activeMenu.value = item.key;
   }
 }
 
-async function handleFileUpload({ file }) {
-  loading.value = true;
-  fileContent.value = '';
-  result.value = null;
-  try {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const content = e.target.result;
-      fileContent.value = content;
-      const res = await detectPII(content);
-      result.value = res.data;
-    };
-    reader.readAsText(file.file);
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function detectFileContent() {
-  if (!fileContent.value) return;
-  loading.value = true;
-  try {
-    const res = await detectPII(fileContent.value);
-    result.value = res.data;
-  } finally {
-    loading.value = false;
-  }
-}
+// 路由变化时自动联动菜单和tab
+watch(
+  () => route.fullPath,
+  (val) => {
+    if (route.path === '/pii') {
+      if (route.query.tab === 'desensitize') {
+        activeMenu.value = 'desensitize';
+      } else {
+        activeMenu.value = 'pii';
+      }
+    } else if (route.path === '/') {
+      activeMenu.value = 'home';
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
 .gpt-root {
   display: flex;
   height: 100vh;
-  background: #f7f7f8;
+  background-color: var(--gpt-bg);
+  color: var(--gpt-text);
 }
+
 .gpt-sidebar {
-  width: 320px;
-  background: #fff;
-  border-right: 1px solid #ececec;
+  width: clamp(280px, 15vw, 360px);
+  background: var(--gpt-sidebar-bg);
+  border-right: 1px solid var(--gpt-border);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0 0 0 0;
+  transition: all 0.3s ease;
 }
+
 .gpt-sidebar-header {
   display: flex;
   align-items: center;
-  height: 64px;
-  padding: 0 36px 0 36px;
-  border-bottom: 1px solid #ececec;
-  width: 100%;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  height: clamp(76px, 8vh, 96px);
+  border-bottom: 1px solid var(--gpt-border);
 }
+
 .gpt-logo {
-  width: 36px;
-  height: 36px;
-  margin-right: 18px;
+  width: clamp(40px, 2.5vw, 56px);
+  height: clamp(40px, 2.5vw, 56px);
+  margin-right: clamp(1rem, 1.5vw, 1.5rem);
 }
+
 .gpt-title {
-  font-size: 1.3rem;
+  font-size: clamp(1.35rem, 1.5vw, 1.75rem);
   font-weight: 600;
+  color: var(--gpt-text);
+  letter-spacing: -0.025em;
 }
+
 .gpt-menu {
   flex: 1;
-  width: 100%;
-  padding: 16px 0 0 0;
+  padding: clamp(0.75rem, 1vw, 1.25rem) 0;
+  overflow-y: auto;
 }
+
 .gpt-menu-item {
-  padding: 12px 40px;
-  cursor: pointer;
-  font-size: 1.08rem;
-  color: #222;
-  border-left: 3px solid transparent;
-  transition: background 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  padding: clamp(0.875rem, 1.2vw, 1.25rem) clamp(1.25rem, 1.5vw, 2rem);
+  color: var(--gpt-text);
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  margin: 0.25rem clamp(0.75rem, 1vw, 1.25rem);
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
+  font-weight: 500;
+  transform-origin: left center;
 }
+
+.gpt-menu-item:hover {
+  background: var(--gpt-hover-bg);
+  transform: scale(1.02);
+}
+
 .gpt-menu-item.active {
-  background: #f3f6fa;
-  border-left: 3px solid #409eff;
-  color: #409eff;
+  background: var(--gpt-active-bg);
+  color: var(--gpt-text);
+  font-weight: 600;
+  transform: scale(1.02);
 }
+
+.gpt-menu-icon {
+  width: clamp(24px, 1.8vw, 32px);
+  height: clamp(24px, 1.8vw, 32px);
+  margin-right: clamp(1rem, 1.2vw, 1.5rem);
+  transition: transform 0.3s ease;
+}
+
+.gpt-menu-item:hover .gpt-menu-icon {
+  transform: scale(1.1);
+}
+
 .gpt-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  background: var(--gpt-main-bg);
+  min-width: 0; /* 防止内容溢出 */
 }
+
 .gpt-main-header {
-  height: 64px;
+  height: clamp(76px, 8vh, 96px);
+  border-bottom: 1px solid var(--gpt-border);
+  background: var(--gpt-header-bg);
+}
+
+.header-content {
+  max-width: min(90vw, 120rem);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 2vw, 3rem);
+  height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 32px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  border-bottom: 1px solid #ececec;
-  background: #fff;
+  justify-content: space-between;
 }
+
 .gpt-main-title {
-  margin-left: 0;
+  font-size: clamp(1.5rem, 1.8vw, 2.25rem);
+  font-weight: 600;
+  color: var(--gpt-text);
+  letter-spacing: -0.025em;
 }
+
 .gpt-chat-section {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: auto;
-  background: #f7f7f8;
+  overflow-y: hidden;
+  background: var(--gpt-bg);
+  padding: clamp(1.5rem, 2vw, 2.5rem);
 }
+
 .gpt-chat-center {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 0 0 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-height: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background: var(--gpt-content-bg);
+  border-radius: clamp(1rem, 1.5vw, 2rem);
+  box-shadow: var(--gpt-content-shadow);
+  overflow: hidden;
 }
-.gpt-feature-title {
+
+.header-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+  gap: clamp(1rem, 1.5vw, 2rem);
 }
-.gpt-feature-title-text {
-  vertical-align: middle;
+
+.theme-toggle {
+  padding: clamp(0.75rem, 1vw, 1rem);
+  border-radius: clamp(0.5rem, 0.75vw, 0.75rem);
+  color: var(--gpt-text);
+  background: var(--gpt-button-bg);
+  border: 2px solid var(--gpt-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.gpt-feature-desc {
-  text-align: center;
-  color: #888;
-  font-size: 1.08rem;
-  margin-bottom: 18px;
+
+.theme-toggle:hover {
+  background: var(--gpt-button-hover-bg);
+  border-color: var(--gpt-text);
 }
-.gpt-input-area-adaptive {
-  width: 90%;
-  margin: 0 auto 10px auto;
+
+.theme-toggle svg {
+  width: clamp(20px, 1.5vw, 28px);
+  height: clamp(20px, 1.5vw, 28px);
 }
-.gpt-input {
-  font-size: 1.08rem;
-}
-.gpt-input-rounded {
-  border-radius: 24px !important;
-  border: 1px solid #e0e0e0 !important;
-  background: #fff !important;
-  box-shadow: none !important;
-  padding: 16px 20px !important;
-  font-size: 1.08rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.gpt-input-rounded:focus {
-  border-color: #bdbdbd !important;
-}
-.gpt-action-bar {
+
+.user-info {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  padding: clamp(1.25rem, 1.5vw, 2rem);
+  border-top: 1px solid var(--gpt-border);
+  gap: clamp(1rem, 1.2vw, 1.5rem);
 }
-.gpt-detect-btn {
-  min-width: 120px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px #e0e6ed;
-}
-.gpt-upload-btn {
-  background: #f3f6fa;
+
+.user-avatar {
+  width: clamp(40px, 2.5vw, 56px);
+  height: clamp(40px, 2.5vw, 56px);
   border-radius: 50%;
-  box-shadow: 0 2px 8px #e0e6ed;
-  border: none;
-}
-.gpt-upload-tip {
-  text-align: center;
-  color: #aaa;
-  font-size: 0.98rem;
-  margin-bottom: 8px;
-}
-.gpt-file-preview {
-  margin-bottom: 12px;
-}
-.gpt-chat-list {
-  margin-top: 24px;
+  background: var(--gpt-text);
+  color: var(--gpt-bg);
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
 }
-.gpt-chat-bubble {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px #f0f1f3;
-  padding: 20px 24px;
-  font-size: 1.08rem;
-  line-height: 1.7;
-  word-break: break-all;
-  border: 1px solid #ececec;
+
+.user-name {
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
+  color: var(--gpt-text);
+  font-weight: 500;
 }
-.risk.高 { color: #e74c3c; font-weight: bold; }
-.risk.中 { color: #f39c12; }
-.risk.低 { color: #27ae60; }
-.gpt-pii-summary {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px 28px 16px 28px;
-  margin: 24px 0 12px 0;
-  box-shadow: 0 2px 8px #f0f1f3;
-  font-size: 1.08rem;
+
+/* Update color variables for black and white theme */
+:root {
+  --gpt-bg: #ffffff;
+  --gpt-text: #202123;
+  --gpt-text-secondary: #6b7280;
+  --gpt-sidebar-bg: #f0f0f0;
+  --gpt-main-bg: #ffffff;
+  --gpt-header-bg: #ffffff;
+  --gpt-content-bg: #ffffff;
+  --gpt-border: #e5e7eb;
+  --gpt-hover-bg: #e7e7e8;
+  --gpt-active-bg: #ddddde;
+  --gpt-active-text: #202123;
+  --gpt-button-bg: #ffffff;
+  --gpt-button-hover-bg: #f3f4f6;
+  --gpt-content-shadow: 0 0 15px rgba(0,0,0,0.1);
+  --gpt-accent: #202123;
+  --gpt-icon-filter: none;
 }
-.gpt-pii-summary-unfold {
-  margin-top: 24px;
-  margin-bottom: 12px;
-  background: #fffbe8;
-  border: 1px solid #ffe58f;
-  box-shadow: 0 2px 8px #f9f6e7;
+
+:root.dark {
+  --gpt-bg: #343541;
+  --gpt-text: #ffffff;
+  --gpt-text-secondary: #9ca3af;
+  --gpt-sidebar-bg: #202123;
+  --gpt-main-bg: #343541;
+  --gpt-header-bg: #343541;
+  --gpt-content-bg: #444654;
+  --gpt-border: #4b5563;
+  --gpt-hover-bg: #2a2b32;
+  --gpt-active-bg: #343541;
+  --gpt-active-text: #ffffff;
+  --gpt-button-bg: #40414f;
+  --gpt-button-hover-bg: #4b5563;
+  --gpt-content-shadow: 0 0 15px rgba(0,0,0,0.2);
+  --gpt-accent: #ffffff;
+  --gpt-icon-filter: brightness(1);
 }
-.gpt-summary-title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  margin-bottom: 10px;
+
+/* Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
-.gpt-summary-row {
-  margin-bottom: 8px;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.gpt-summary-reason {
-  color: #666;
-  font-size: 0.98rem;
-  line-height: 1.7;
-}
-.gpt-pii-collapse {
-  margin-top: 18px;
+
+/* 媒体查询用于超大屏幕 */
+@media (min-width: 2560px) {
+  .gpt-menu-item {
+    padding: 1.5rem 2.5rem;
+  }
+  
+  .gpt-chat-section {
+    padding: 3rem;
+  }
+  
+  .gpt-chat-center {
+    border-radius: 2rem;
+  }
 }
 </style>
 
