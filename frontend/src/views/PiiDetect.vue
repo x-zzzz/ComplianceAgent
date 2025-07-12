@@ -1,26 +1,44 @@
 <template>
-  <div class="gpt-root chatgpt-style-bg">
+  <div class="gpt-root">
     <aside class="gpt-sidebar">
       <div class="gpt-sidebar-header">
-        <img src="../assets/compliance_bot.svg" alt="compliance bot" class="gpt-logo" />
-        <span class="gpt-title" style="display: flex; align-items: center; gap: 8px;">
-          合规小助手
-        </span>
+        <img src="../assets/modern_bot.svg" alt="compliance bot" class="gpt-logo" />
+        <span class="gpt-title">合规智能体</span>
       </div>
       <nav class="gpt-menu">
-        <div v-for="item in menuOptions" :key="item.key" :class="['gpt-menu-item', {active: activeMenu === item.key}]"
-          @click="handleMenuClick(item)">
+        <div v-for="item in menuOptions" 
+             :key="item.key" 
+             :class="['gpt-menu-item', { active: activeMenu === item.key }]"
+             @click="handleMenuClick(item)">
           <img :src="item.icon" :alt="item.label + ' icon'" class="gpt-menu-icon" />
           <span>{{ item.label }}</span>
         </div>
       </nav>
+      <div class="gpt-sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">AI</div>
+          <span class="user-name">合规助手</span>
+        </div>
+      </div>
     </aside>
-    <main class="gpt-main chatgpt-main">
-      <header class="gpt-main-header chatgpt-header">
-        <span class="gpt-main-title chatgpt-title-main">个人信息检测与风险评估</span>
+    <main class="gpt-main">
+      <header class="gpt-main-header">
+        <div class="header-content">
+          <h1 class="gpt-main-title">{{ getActiveMenuLabel }}</h1>
+          <div class="header-controls">
+            <button class="theme-toggle" @click="toggleTheme">
+              <svg v-if="isDark" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </header>
-      <section class="gpt-chat-section chatgpt-chat-section">
-        <div class="gpt-chat-center chatgpt-chat-center">
+      <section class="gpt-chat-section">
+        <div class="gpt-chat-center">
           <template v-if="activeMenu === 'pii'">
             <PiiDetectPanel />
           </template>
@@ -34,13 +52,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import PiiDetectPanel from './PiiDetectPanel.vue';
 import DesensitizePanel from './DesensitizePanel.vue';
 
 const router = useRouter();
 const route = useRoute();
+const isDark = ref(false);
 
 const menuOptions = [
   { label: '首页', key: 'home', icon: require('../assets/compliance_bot.svg'), path: '/' },
@@ -56,6 +75,16 @@ const menuOptions = [
 ];
 
 const activeMenu = ref('pii');
+
+const getActiveMenuLabel = computed(() => {
+  const item = menuOptions.find(item => item.key === activeMenu.value);
+  return item ? item.label : '';
+});
+
+function toggleTheme() {
+  isDark.value = !isDark.value;
+  document.documentElement.classList.toggle('dark');
+}
 
 function handleMenuClick(item) {
   if (item.key === 'home') {
@@ -87,292 +116,249 @@ watch(
   },
   { immediate: true }
 );
-// ...existing code...
 </script>
 
 <style scoped>
 .gpt-root {
   display: flex;
   height: 100vh;
-  background: #f7f7f8;
+  background-color: var(--gpt-bg);
+  color: var(--gpt-text);
 }
+
 .gpt-sidebar {
-  width: 320px;
-  background: #fff;
-  border-right: 1px solid #ececec;
+  width: clamp(280px, 15vw, 360px);
+  background: var(--gpt-sidebar-bg);
+  border-right: 1px solid var(--gpt-border);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0 0 0 0;
+  transition: all 0.3s ease;
 }
+
 .gpt-sidebar-header {
   display: flex;
   align-items: center;
-  height: 64px;
-  padding: 0 36px 0 36px;
-  border-bottom: 1px solid #ececec;
-  width: 100%;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  height: clamp(76px, 8vh, 96px);
+  border-bottom: 1px solid var(--gpt-border);
 }
+
 .gpt-logo {
-  width: 36px;
-  height: 36px;
-  margin-right: 18px;
+  width: clamp(40px, 2.5vw, 56px);
+  height: clamp(40px, 2.5vw, 56px);
+  margin-right: clamp(1rem, 1.5vw, 1.5rem);
 }
+
 .gpt-title {
-  font-size: 1.3rem;
+  font-size: clamp(1.35rem, 1.5vw, 1.75rem);
   font-weight: 600;
-  letter-spacing: 1px;
+  color: var(--gpt-text);
+  letter-spacing: -0.025em;
 }
-.gpt-menu-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 12px;
-  vertical-align: middle;
-}
+
 .gpt-menu {
   flex: 1;
-  width: 100%;
-  padding: 16px 0 0 0;
+  padding: clamp(0.75rem, 1vw, 1.25rem) 0;
+  overflow-y: auto;
 }
+
 .gpt-menu-item {
-  padding: 12px 40px;
-  cursor: pointer;
-  font-size: 1.08rem;
-  color: #222;
-  border-left: 3px solid transparent;
-  transition: background 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  padding: clamp(0.875rem, 1.2vw, 1.25rem) clamp(1.25rem, 1.5vw, 2rem);
+  color: var(--gpt-text);
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  margin: 0.25rem clamp(0.75rem, 1vw, 1.25rem);
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
+  font-weight: 500;
+  transform-origin: left center;
 }
+
+.gpt-menu-item:hover {
+  background: var(--gpt-hover-bg);
+  transform: scale(1.02);
+}
+
 .gpt-menu-item.active {
-  background: #f3f6fa;
-  border-left: 3px solid #409eff;
-  color: #409eff;
+  background: var(--gpt-active-bg);
+  color: var(--gpt-text);
+  font-weight: 600;
+  transform: scale(1.02);
 }
+
+.gpt-menu-icon {
+  width: clamp(24px, 1.8vw, 32px);
+  height: clamp(24px, 1.8vw, 32px);
+  margin-right: clamp(1rem, 1.2vw, 1.5rem);
+  transition: transform 0.3s ease;
+}
+
+.gpt-menu-item:hover .gpt-menu-icon {
+  transform: scale(1.1);
+}
+
 .gpt-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  background: var(--gpt-main-bg);
+  min-width: 0; /* 防止内容溢出 */
 }
+
 .gpt-main-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 32px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  border-bottom: 1px solid #ececec;
-  background: #fff;
+  height: clamp(76px, 8vh, 96px);
+  border-bottom: 1px solid var(--gpt-border);
+  background: var(--gpt-header-bg);
 }
-.gpt-main-title {
-  margin-left: 0;
-}
-.gpt-chat-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: auto;
-  background: #f7f7f8;
-}
-.gpt-chat-center {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 0 0 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-height: 0;
-}
-.gpt-feature-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.gpt-feature-title-text {
-  vertical-align: middle;
-}
-.gpt-feature-desc {
-  text-align: center;
-  color: #888;
-  font-size: 1.08rem;
-  margin-bottom: 18px;
-}
-.gpt-input-area-adaptive {
-  width: 90%;
-  margin: 0 auto 10px auto;
-}
-.gpt-input {
-  font-size: 1.08rem;
-}
-.gpt-input-rounded {
-  border-radius: 24px !important;
-  border: 1px solid #e0e0e0 !important;
-  background: #fff !important;
-  box-shadow: none !important;
-  padding: 16px 20px !important;
-  font-size: 1.08rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.gpt-input-rounded:focus {
-  border-color: #bdbdbd !important;
-}
-.gpt-action-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-.gpt-detect-btn {
-  min-width: 120px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px #e0e6ed;
-}
-.gpt-upload-btn {
-  background: #f3f6fa;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px #e0e6ed;
-  border: none;
-}
-.gpt-upload-tip {
-  text-align: center;
-  color: #aaa;
-  font-size: 0.98rem;
-  margin-bottom: 8px;
-}
-.gpt-file-preview {
-  margin-bottom: 12px;
-}
-.gpt-chat-list {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.gpt-chat-bubble {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px #f0f1f3;
-  padding: 20px 24px;
-  font-size: 1.08rem;
-  line-height: 1.7;
-  word-break: break-all;
-  border: 1px solid #ececec;
-}
-.risk.高 { color: #e74c3c; font-weight: bold; }
-.risk.中 { color: #f39c12; }
-.risk.低 { color: #27ae60; }
-.gpt-pii-summary {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px 28px 16px 28px;
-  margin: 24px 0 12px 0;
-  box-shadow: 0 2px 8px #f0f1f3;
-  font-size: 1.08rem;
-}
-.gpt-pii-summary-unfold {
-  margin-top: 24px;
-  margin-bottom: 12px;
-  background: #fffbe8;
-  border: 1px solid #ffe58f;
-  box-shadow: 0 2px 8px #f9f6e7;
-}
-.gpt-summary-title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-.gpt-summary-row {
-  margin-bottom: 8px;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.gpt-summary-reason {
-  color: #666;
-  font-size: 0.98rem;
-  line-height: 1.7;
-}
-.gpt-pii-collapse {
-  margin-top: 18px;
-}
-.gpt-desensitize-section {
-  margin-top: 24px;
-  padding: 24px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 8px #f0f1f3;
-}
-.gpt-desensitize-btn {
-  min-width: 120px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px #e0e6ed;
-}
-.gpt-desensitize-result {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-top: 12px;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-.gpt-desensitized-text {
-  word-break: break-all;
-  white-space: pre-wrap;
-}
-/* ChatGPT风格增强 */
-.chatgpt-style-bg {
-  background: #f7f7f8 !important;
-}
-.chatgpt-header {
-  background: #fff;
-  border-bottom: 1px solid #ececec;
-  box-shadow: 0 1px 4px #f0f1f3;
-}
-.chatgpt-title-main {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #222;
-}
-.chatgpt-main {
-  background: #f7f7f8;
-}
-.chatgpt-chat-section {
-  background: #f7f7f8;
-}
-.chatgpt-chat-center {
-  max-width: 700px;
+
+.header-content {
+  max-width: min(90vw, 120rem);
   width: 100%;
   margin: 0 auto;
-  padding: 32px 0 0 0;
+  padding: 0 clamp(1.5rem, 2vw, 3rem);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.gpt-panel-card, .chatgpt-panel-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.04);
-  padding: 32px 36px 28px 36px;
-  margin-bottom: 32px;
+
+.gpt-main-title {
+  font-size: clamp(1.5rem, 1.8vw, 2.25rem);
+  font-weight: 600;
+  color: var(--gpt-text);
+  letter-spacing: -0.025em;
 }
-.gpt-chat-bubble, .n-input, .n-card, .n-upload, .n-collapse, .n-collapse-item, .gpt-desensitize-result {
-  border-radius: 18px !important;
+
+.gpt-chat-section {
+  flex: 1;
+  overflow-y: hidden;
+  background: var(--gpt-bg);
+  padding: clamp(1.5rem, 2vw, 2.5rem);
 }
-.gpt-desensitize-result {
-  background: #f8fafc;
-  border-radius: 18px !important;
+
+.gpt-chat-center {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background: var(--gpt-content-bg);
+  border-radius: clamp(1rem, 1.5vw, 2rem);
+  box-shadow: var(--gpt-content-shadow);
+  overflow: hidden;
 }
-.gpt-input-rounded {
-  border-radius: 18px !important;
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 1.5vw, 2rem);
+}
+
+.theme-toggle {
+  padding: clamp(0.75rem, 1vw, 1rem);
+  border-radius: clamp(0.5rem, 0.75vw, 0.75rem);
+  color: var(--gpt-text);
+  background: var(--gpt-button-bg);
+  border: 2px solid var(--gpt-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--gpt-button-hover-bg);
+  border-color: var(--gpt-text);
+}
+
+.theme-toggle svg {
+  width: clamp(20px, 1.5vw, 28px);
+  height: clamp(20px, 1.5vw, 28px);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: clamp(1.25rem, 1.5vw, 2rem);
+  border-top: 1px solid var(--gpt-border);
+  gap: clamp(1rem, 1.2vw, 1.5rem);
+}
+
+.user-avatar {
+  width: clamp(40px, 2.5vw, 56px);
+  height: clamp(40px, 2.5vw, 56px);
+  border-radius: 50%;
+  background: var(--gpt-text);
+  color: var(--gpt-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
+}
+
+.user-name {
+  font-size: clamp(1.1rem, 1.2vw, 1.4rem);
+  color: var(--gpt-text);
+  font-weight: 500;
+}
+
+/* Update color variables for black and white theme */
+:root {
+  --gpt-bg: #ffffff;
+  --gpt-text: #202123;
+  --gpt-text-secondary: #6b7280;
+  --gpt-sidebar-bg: #f0f0f0;
+  --gpt-main-bg: #ffffff;
+  --gpt-header-bg: #ffffff;
+  --gpt-content-bg: #ffffff;
+  --gpt-border: #e5e7eb;
+  --gpt-hover-bg: #e7e7e8;
+  --gpt-active-bg: #ddddde;
+  --gpt-active-text: #202123;
+  --gpt-button-bg: #ffffff;
+  --gpt-button-hover-bg: #f3f4f6;
+  --gpt-content-shadow: 0 0 15px rgba(0,0,0,0.1);
+  --gpt-accent: #202123;
+  --gpt-icon-filter: none;
+}
+
+:root.dark {
+  --gpt-bg: #343541;
+  --gpt-text: #ffffff;
+  --gpt-text-secondary: #9ca3af;
+  --gpt-sidebar-bg: #202123;
+  --gpt-main-bg: #343541;
+  --gpt-header-bg: #343541;
+  --gpt-content-bg: #444654;
+  --gpt-border: #4b5563;
+  --gpt-hover-bg: #2a2b32;
+  --gpt-active-bg: #343541;
+  --gpt-active-text: #ffffff;
+  --gpt-button-bg: #40414f;
+  --gpt-button-hover-bg: #4b5563;
+  --gpt-content-shadow: 0 0 15px rgba(0,0,0,0.2);
+  --gpt-accent: #ffffff;
+  --gpt-icon-filter: brightness(1);
+}
+
+/* Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* 媒体查询用于超大屏幕 */
+@media (min-width: 2560px) {
+  .gpt-menu-item {
+    padding: 1.5rem 2.5rem;
+  }
+  
+  .gpt-chat-section {
+    padding: 3rem;
+  }
+  
+  .gpt-chat-center {
+    border-radius: 2rem;
+  }
 }
 </style>
 

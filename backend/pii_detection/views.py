@@ -65,8 +65,10 @@ class PiiDetectView(APIView):
 
     def post(self, request):
         text = request.data.get("text", None)
+        model = request.data.get("model", "presidio")  # 默认使用presidio
         file = request.FILES.get('file', None)
         extracted_text = None
+        
         if file:
             try:
                 extracted_text = self.extract_text_from_file(file)
@@ -79,11 +81,21 @@ class PiiDetectView(APIView):
         else:
             return Response({"error": "请上传文件或输入文本"}, status=status.HTTP_400_BAD_REQUEST)
 
-        logger.info(f"PII检测请求，文本长度: {len(extracted_text)}")
+        logger.info(f"PII检测请求，模型: {model}, 文本长度: {len(extracted_text)}")
         # 动态加载知识库内容，转为 prompt
         from .knowledge_utils import load_knowledge_base
         knowledge_base_prompt = load_knowledge_base()
-        result = detect_pii_and_risk(extracted_text, knowledge_base_prompt)
+        
+        # 根据选择的模型调用不同的检测方法
+        if model == "deepseek":
+            # 使用deepseek方法
+            from .deepseek_client import detect_pii_with_deepseek
+            result = detect_pii_with_deepseek(extracted_text)
+        else:
+            # 默认使用presidio方法
+            from .presidio_client import detect_pii_with_presidio
+            result = detect_pii_with_presidio(extracted_text)
+        
         logger.info(f"检测结果: {result}")
         record = PiiDetectionRecord.objects.create(
             text=extracted_text,

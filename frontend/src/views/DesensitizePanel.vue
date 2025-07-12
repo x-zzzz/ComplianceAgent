@@ -1,37 +1,49 @@
 <template>
-  <div class="gpt-desensitize-section gpt-panel-card chatgpt-panel-card">
-    <div class="chatgpt-title-row">
-      <n-icon size="48" color="#409eff" style="vertical-align: middle; margin-right: 12px;">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#409eff"/></svg>
-      </n-icon>
-      <span class="chatgpt-title-main">脱敏处理</span>
+  <div class="chat-container">
+    <div class="chat-messages" v-if="desensitizeResult">
+      <div class="gpt-desensitize-result">
+        <div class="gpt-summary-title">脱敏处理结果</div>
+        <div class="gpt-summary-row">
+          <span>脱敏后文本：</span>
+          <div class="gpt-desensitized-text">{{ desensitizeResult }}</div>
+        </div>
+      </div>
     </div>
-    <div class="chatgpt-desc">对检测到的敏感信息进行脱敏处理，保护个人隐私。</div>
-    <div class="gpt-input-area-adaptive chatgpt-input-area">
-      <n-input
-        v-model:value="desensitizeText"
-        type="textarea"
-        :autosize="{ minRows: 6, maxRows: 12 }"
-        placeholder="请输入待脱敏文本..."
-        :disabled="desensitizeLoading"
-        class="gpt-input chatgpt-input-rounded"
-        style="border-radius:18px;background:#f7f7f8;border:1.5px solid #e0e0e0;"
-      />
-    </div>
-    <div class="gpt-action-bar chatgpt-action-bar">
-      <n-button type="primary" size="large" class="gpt-desensitize-btn chatgpt-btn" :loading="desensitizeLoading" :disabled="!desensitizeText" @click="handleDesensitize">
-        <n-icon size="24"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></n-icon>
-      </n-button>
-      <n-button v-if="desensitizeDownloadUrl" type="default" size="large" class="chatgpt-btn" :disabled="desensitizeLoading" @click="downloadDesensitizedText">
-        <n-icon size="22"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke="#409eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="16" width="16" height="4" rx="2" fill="#409eff"/></svg></n-icon>
-      </n-button>
-    </div>
-    <div class="chatgpt-tip">点击右侧按钮可下载脱敏文本</div>
-    <div v-if="desensitizeResult" class="gpt-desensitize-result" style="margin-top: 16px;">
-      <div class="gpt-summary-title">脱敏处理结果</div>
-      <div class="gpt-summary-row">
-        <span>脱敏后文本：</span>
-        <div class="gpt-desensitized-text">{{ desensitizeResult }}</div>
+    
+    <div class="chat-input-container">
+      <div class="input-wrapper">
+        <n-input
+          v-model:value="desensitizeText"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 12 }"
+          placeholder="请输入待脱敏文本..."
+          :disabled="desensitizeLoading"
+          class="gpt-input"
+        />
+        
+        <div class="input-buttons">
+          <button 
+            class="icon-button" 
+            :disabled="!desensitizeText || desensitizeLoading"
+            @click="handleDesensitize"
+            title="开始脱敏"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          
+          <button 
+            v-if="desensitizeDownloadUrl"
+            class="icon-button"
+            @click="downloadDesensitizedText"
+            title="下载脱敏后文本"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 15V3m0 12l-4-4m4 4l4-4M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -143,5 +155,130 @@ function downloadDesensitizedText() {
 .n-input__textarea {
   border-radius: 18px !important;
   background: #f7f7f8 !important;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100vh - 76px);
+  background: var(--gpt-bg);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 0;
+}
+
+.chat-input-container {
+  border-top: 1px solid var(--gpt-border);
+  padding: 1.5rem;
+  background: var(--gpt-bg);
+  position: relative;
+}
+
+.input-wrapper {
+  position: relative;
+  max-width: min(65vw, 60rem);
+  margin: 0 auto;
+  background: var(--gpt-content-bg);
+  border: 1px solid var(--gpt-border);
+  border-radius: 1.5rem;
+  padding: 1rem;
+  box-shadow: var(--gpt-content-shadow);
+  transition: all 0.3s ease;
+}
+
+.input-wrapper:hover {
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+}
+
+.gpt-input {
+  width: 100%;
+  padding-right: 6rem;
+}
+
+:deep(.n-input) {
+  background: transparent !important;
+}
+
+:deep(.n-input__textarea) {
+  min-height: 4.5rem !important;
+  padding: 1rem !important;
+  border-radius: 1.25rem !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  background: transparent !important;
+}
+
+:deep(.n-input__textarea-mirror) {
+  padding: 1rem !important;
+}
+
+.input-buttons {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: var(--gpt-button-bg);
+  color: var(--gpt-text);
+  cursor: pointer;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  border: 1px solid var(--gpt-border);
+}
+
+.icon-button:hover {
+  background: var(--gpt-hover-bg);
+  transform: scale(1.05);
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.gpt-desensitize-result {
+  margin: 2rem auto;
+  max-width: min(65vw, 60rem);
+  padding: 1.5rem;
+  background: var(--gpt-content-bg);
+  border-radius: 1.25rem;
+  border: 1px solid var(--gpt-border);
+  box-shadow: var(--gpt-content-shadow);
+}
+
+.gpt-summary-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--gpt-text);
+}
+
+.gpt-summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--gpt-text);
+}
+
+.gpt-desensitized-text {
+  background: var(--gpt-hover-bg);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  line-height: 1.6;
 }
 </style>

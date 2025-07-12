@@ -9,6 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vicons/antd": "^0.13.0",
     "@vueuse/core": "^13.5.0",
     "axios": "^1.6.0",
     "naive-ui": "^2.34.4",
