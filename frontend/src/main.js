@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import naive from 'naive-ui';
+import './index.css';
 
 // 抑制 ResizeObserver loop 錯誤
 const observerErrMsg = 'ResizeObserver loop completed with undelivered notifications';

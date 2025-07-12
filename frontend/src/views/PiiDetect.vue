@@ -8,7 +8,8 @@
         </span>
       </div>
       <nav class="gpt-menu">
-        <div v-for="item in menuOptions" :key="item.key" :class="['gpt-menu-item', {active: activeMenu === item.key}]" @click="activeMenu = item.key">
+        <div v-for="item in menuOptions" :key="item.key" :class="['gpt-menu-item', {active: activeMenu === item.key}]"
+          @click="handleMenuClick(item)">
           <img :src="item.icon" :alt="item.label + ' icon'" class="gpt-menu-icon" />
           <span>{{ item.label }}</span>
         </div>
@@ -33,14 +34,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import PiiDetectPanel from './PiiDetectPanel.vue';
 import DesensitizePanel from './DesensitizePanel.vue';
 
-const activeMenu = ref('pii');
+const router = useRouter();
+const route = useRoute();
+
 const menuOptions = [
-  { label: 'PII检测', key: 'pii', icon: require('../assets/pii.svg') },
-  { label: '脱敏处理', key: 'desensitize', icon: require('../assets/desensitize.svg') },
+  { label: '首页', key: 'home', icon: require('../assets/compliance_bot.svg'), path: '/' },
+  { label: 'PII检测', key: 'pii', icon: require('../assets/pii.svg'), path: '/pii' },
+  { label: '脱敏处理', key: 'desensitize', icon: require('../assets/desensitize.svg'), path: '/pii?tab=desensitize' },
   { label: '敏感词扫描', key: 'sensitive_words', icon: require('../assets/sensitive_words.svg') },
   { label: '合规风险评估', key: 'risk_assess', icon: require('../assets/risk_assess.svg') },
   { label: '合规知识库问答', key: 'qa', icon: require('../assets/qa.svg') },
@@ -49,6 +54,39 @@ const menuOptions = [
   { label: '日志与历史记录', key: 'history', icon: require('../assets/history.svg') },
   { label: '系统设置', key: 'settings', icon: require('../assets/settings.svg') }
 ];
+
+const activeMenu = ref('pii');
+
+function handleMenuClick(item) {
+  if (item.key === 'home') {
+    router.push('/');
+    return;
+  }
+  if (item.path) {
+    router.push(item.path);
+  }
+  // 只在 /pii 路由下切换 tab
+  if (route.path === '/pii' && (item.key === 'pii' || item.key === 'desensitize')) {
+    activeMenu.value = item.key;
+  }
+}
+
+// 路由变化时自动联动菜单和tab
+watch(
+  () => route.fullPath,
+  (val) => {
+    if (route.path === '/pii') {
+      if (route.query.tab === 'desensitize') {
+        activeMenu.value = 'desensitize';
+      } else {
+        activeMenu.value = 'pii';
+      }
+    } else if (route.path === '/') {
+      activeMenu.value = 'home';
+    }
+  },
+  { immediate: true }
+);
 // ...existing code...
 </script>
 

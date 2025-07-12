@@ -1,47 +1,46 @@
 <template>
   <div class="gpt-panel-card chatgpt-panel-card">
-    <div class="gpt-feature-title">
-      <n-icon size="40" color="#409eff" style="vertical-align: middle; margin-right: 10px;">
+    <div class="chatgpt-title-row">
+      <n-icon size="48" color="#409eff" style="vertical-align: middle; margin-right: 12px;">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#409eff"/></svg>
       </n-icon>
-      <span class="gpt-feature-title-text">智能检测医疗文本中的敏感信息与风险</span>
+      <span class="chatgpt-title-main">智能检测医疗文本中的敏感信息与风险</span>
     </div>
-    <div class="gpt-feature-desc">本功能可自动识别医疗文本中的敏感个人信息，并评估其风险等级，助力数据合规。</div>
-    <div class="gpt-input-area-adaptive">
+    <div class="chatgpt-desc">本功能可自动识别医疗文本中的敏感个人信息，并评估其风险等级，助力数据合规。</div>
+    <div class="gpt-input-area-adaptive chatgpt-input-area">
       <n-input
         v-model:value="text"
         type="textarea"
-        :autosize="{ minRows: 4, maxRows: 8 }"
+        :autosize="{ minRows: 6, maxRows: 12 }"
         placeholder="请输入待检测文本..."
         :disabled="loading"
-        class="gpt-input gpt-input-rounded"
+        class="gpt-input chatgpt-input-rounded"
       />
     </div>
-    <div class="gpt-action-bar">
+    <div class="gpt-action-bar chatgpt-action-bar">
       <n-upload
         :custom-request="handleFileUpload"
         :show-file-list="false"
         accept=".txt,.pdf,.doc,.docx"
         :disabled="loading"
       >
-        <n-button quaternary circle size="large" class="gpt-upload-btn" :loading="loading">
+        <n-button quaternary circle size="large" class="gpt-upload-btn chatgpt-btn" :loading="loading">
           <n-icon size="24"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke="#409eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="16" width="16" height="4" rx="2" fill="#409eff"/></svg></n-icon>
         </n-button>
       </n-upload>
-      <n-button type="primary" size="large" class="gpt-detect-btn" :loading="loading" :disabled="!text && !fileContent" @click="detectPIIHandler">
-        <n-icon size="24" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></n-icon>
-        检测
+      <n-button type="primary" size="large" class="gpt-detect-btn chatgpt-btn" :loading="loading" :disabled="!text && !fileContent" @click="detectPIIHandler">
+        <n-icon size="24"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></n-icon>
       </n-button>
     </div>
-    <div class="gpt-upload-tip">支持上传 .txt/.pdf/.doc/.docx 文件，或直接粘贴文本</div>
-    <div v-if="fileContent" class="gpt-file-preview">
+    <div class="gpt-upload-tip chatgpt-tip">支持上传 .txt/.pdf/.doc/.docx 文件，或直接粘贴文本</div>
+    <div v-if="fileContent" class="gpt-file-preview chatgpt-input-area">
       <n-input
         v-model:value="fileContent"
         type="textarea"
-        :autosize="{ minRows: 2, maxRows: 6 }"
+        :autosize="{ minRows: 3, maxRows: 8 }"
         placeholder="文件内容将显示在此处"
         :disabled="true"
-        class="gpt-input"
+        class="gpt-input chatgpt-input-rounded"
       />
     </div>
     <div v-if="result && result.total_entities !== undefined" class="gpt-pii-summary gpt-pii-summary-unfold">
@@ -55,7 +54,7 @@
       </div>
       <div class="gpt-summary-row">
         <span>合规风险说明：</span>
-        <span class="gpt-summary-reason">{{ result.overall_reason }}</span>
+        <span class="gpt-summary-reason chatgpt-desc">{{ result.overall_reason }}</span>
       </div>
     </div>
     <n-collapse v-if="result && result.details && result.details.length" class="gpt-pii-collapse" accordion>
@@ -72,7 +71,7 @@
         </div>
         <div>
           <b>合规说明：</b>
-          <span class="gpt-summary-reason">{{ item.reason }}</span>
+          <span class="gpt-summary-reason chatgpt-desc">{{ item.reason }}</span>
         </div>
       </n-collapse-item>
     </n-collapse>
@@ -135,5 +134,56 @@ async function handleFileUpload({ file }) {
 </script>
 
 <style scoped>
-/* 复用主样式，圆角由主文件控制 */
+.chatgpt-input-area {
+  width: 100%;
+  margin: 0 0 18px 0;
+}
+.chatgpt-input-rounded {
+  border-radius: 18px !important;
+}
+.n-input__textarea {
+  border-radius: 18px !important;
+  background: #f7f7f8 !important;
+}
+.chatgpt-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.chatgpt-title-main {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+}
+.chatgpt-desc {
+  color: #888;
+  font-size: 1.02rem;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.chatgpt-action-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.chatgpt-btn {
+  border-radius: 50% !important;
+  min-width: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px #e0e6ed;
+}
+.chatgpt-tip {
+  color: #bbb;
+  font-size: 0.95rem;
+  text-align: right;
+  margin-bottom: 8px;
+}
 </style>
