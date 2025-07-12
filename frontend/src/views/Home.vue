@@ -4,7 +4,10 @@
     <section class="min-h-screen relative flex flex-col items-center justify-center text-center px-6 bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent animate-pulse"></div>
       <div class="relative z-10 transform transition-all" :class="{ 'translate-y-0 opacity-100': isVisible, 'translate-y-12 opacity-0': !isVisible }">
-        <img src="../assets/compliance_bot.svg" alt="合规智能体" class="w-32 h-32 mb-8 animate-float" />
+        <div class="relative w-48 h-48 md:w-64 md:h-64 mx-auto mb-12 bot-container">
+          <img src="../assets/modern_bot.svg" alt="合规智能体" class="w-full h-full animate-float filter drop-shadow-[0_0_15px_rgba(79,172,254,0.3)]" />
+          <div class="absolute inset-0 bg-gradient-radial from-blue-500/10 to-transparent opacity-50 animate-pulse-slow rounded-full"></div>
+        </div>
         <h1 class="text-6xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
           合规智能体平台
         </h1>
@@ -145,13 +148,39 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+/* Bot container specific styles */
+.bot-container {
+  perspective: 1000px;
+}
+
+.bot-container img {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%, 100% { 
+    transform: translateY(0) rotateY(0deg); 
+  }
+  25% {
+    transform: translateY(-10px) rotateY(5deg);
+  }
+  75% {
+    transform: translateY(-5px) rotateY(-5deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 .feature-card, .reason-card {
