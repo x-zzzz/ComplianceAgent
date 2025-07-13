@@ -200,9 +200,17 @@
           <button
             class="send-button"
             :disabled="!inputText || loading"
+            :class="{ 'is-loading': loading }"
             @click="detectPII"
           >
-            <n-icon><SendOutlined /></n-icon>
+            <n-icon v-if="!loading">
+              <SendOutlined />
+            </n-icon>
+            <div v-else class="loading-spinner">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
           </button>
         </div>
       </div>
@@ -957,6 +965,45 @@ const detectPII = async () => {
   background: var(--gpt-border);
   cursor: not-allowed;
   transform: none;
+}
+
+.send-button.is-loading {
+  background: var(--gpt-text);
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.loading-spinner .dot {
+  width: 4px;
+  height: 4px;
+  background-color: var(--gpt-bg);
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-spinner .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-spinner .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 
+  40% { 
+    transform: scale(1);
+  }
 }
 
 /* 描述文本区域样式 */
