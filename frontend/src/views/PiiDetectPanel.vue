@@ -99,6 +99,14 @@
       </div>
     </div>
 
+    <!-- Description Area -->
+    <div class="description-area" v-if="!piiResult">
+      <div class="description-content">
+        <p class="description-text">请输入任意文本，智能检测系统将自动识别并标注其中的敏感信息</p>
+        <p class="description-subtext">支持识别姓名、身份证号、手机号、地址等多种敏感信息</p>
+      </div>
+    </div>
+
     <!-- Input Area -->
     <div class="chat-input-container">
       <div class="input-wrapper">
@@ -582,5 +590,31 @@ const detectPII = async () => {
   background: var(--gpt-border);
   cursor: not-allowed;
   transform: none;
+}
+
+/* 描述文本区域样式 */
+.description-area {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.description-content {
+  max-width: 800px;
+}
+
+.description-text {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--gpt-text);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.description-subtext {
+  font-size: 1.1rem;
+  color: var(--gpt-text-secondary);
+  opacity: 0.8;
 }
 </style>
