@@ -55,3 +55,36 @@ def deepseek_detect(text, knowledge_base_prompt=None):
     except Exception as e:
         logger.error(f"Deepseek API 调用失败: {e}")
         return {"error": str(e)}
+
+def detect_pii_with_deepseek(text):
+    """
+    使用 Deepseek 进行 PII 检测的包装函数
+    返回标准化的检测结果
+    """
+    try:
+        # 调用 deepseek_detect 函数
+        result = deepseek_detect(text)
+        
+        if "error" in result:
+            logger.error(f"Deepseek 检测失败: {result['error']}")
+            return {
+                "summary": {
+                    "total_entities": 0,
+                    "risk_level": "未知",
+                    "overall_reason": f"检测失败: {result['error']}"
+                },
+                "details": []
+            }
+            
+        return result  # 直接返回 deepseek_detect 的结果
+        
+    except Exception as e:
+        logger.error(f"Deepseek PII 检测出错: {str(e)}")
+        return {
+            "summary": {
+                "total_entities": 0,
+                "risk_level": "未知",
+                "overall_reason": f"检测过程出错: {str(e)}"
+            },
+            "details": []
+        }
