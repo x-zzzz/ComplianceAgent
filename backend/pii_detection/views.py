@@ -110,11 +110,7 @@ class PiiDetectView(APIView):
         overall_reason = summary.get("overall_reason", "")
         knowledge_explanation = find_knowledge_explanation(overall_reason)
         return Response({
-            "total_entities": summary.get("total_entities", 0),
-            "risk_level": summary.get("risk_level", "未知"),
-            "overall_reason": overall_reason,
-            "overall_reason_explanation": knowledge_explanation,
+            "summary": summary,
             "details": result.get("details", []),
-            "raw_response": result.get("raw_response"),
             "text": extracted_text
         }, status=status.HTTP_201_CREATED)
