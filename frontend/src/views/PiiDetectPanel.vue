@@ -328,18 +328,25 @@ const animateResults = async () => {
     // 步骤3: 逐个显示详细信息
     if (piiResult.value.details?.length) {
       currentStep.value = 3
+      displayedDetails.value = []  // 清空现有详情
+      
       for (const detail of piiResult.value.details) {
-        const newDetail = { ...detail, entities: [], reason: '' }
+        // 创建新的详情对象
+        const newDetail = {
+          risk_level: detail.risk_level,
+          entities: [],
+          reason: ''
+        }
         displayedDetails.value.push(newDetail)
         
         // 显示实体
         for (const entity of detail.entities) {
-          await new Promise(resolve => setTimeout(resolve, typeSpeed * 5))
+          await new Promise(resolve => setTimeout(resolve, typeSpeed * 3))
           newDetail.entities.push(entity)
         }
         
-        // 显示原因
-        await typeWriter(newDetail, detail.reason, typeSpeed * 1.5)
+        // 设置原因文本
+        newDetail.reason = detail.reason
         await new Promise(resolve => setTimeout(resolve, stepDelay))
       }
     }
