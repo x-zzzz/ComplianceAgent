@@ -9,7 +9,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - presidio-analyzer
     env_file:
       - backend/.env
     restart: always
@@ -40,21 +39,6 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  presidio-analyzer:
-    image: mcr.microsoft.com/presidio-analyzer
-    ports:
-      - "3000:3000"
-    environment:
-      - PRESIDIO_DEFAULT_LANGUAGE=zh
-      - ENABLE_TRACE_LOGS=1
-    command: >
-      /bin/bash -c "
-      pip install flask requests spacy yaml&&
-      python -m spacy download zh_core_web_sm &&
-      python -m spacy download zh_core_web_trf &&
-      python app.py --host 0.0.0.0 --log-level DEBUG"
-    restart: always
 
 volumes:
   postgres_data:

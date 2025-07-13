@@ -12,8 +12,6 @@
             :options="modelOptions"
             placeholder="选择检测模型"
             size="large"
-            :render-label="renderModelLabel"
-            :render-option="renderModelOption"
           />
         </div>
         <div class="header-actions">
@@ -110,11 +108,18 @@
                       </div>
                       <div class="risk-type-tag">
                         {{ 
-                          detail.entities[0].includes('身份证') ? '身份信息' :
-                          detail.entities[0].includes('电话') ? '联系方式' :
+                          detail.entities[0].includes('身份证') || detail.entities[0].includes('护照') ? '身份证件' :
+                          detail.entities[0].includes('电话') || detail.entities[0].includes('手机') || detail.entities[0].includes('邮箱') ? '联系方式' :
                           detail.entities[0].includes('地址') ? '地理位置' :
-                          detail.entities[0].includes('过敏') ? '健康信息' :
-                          '个人信息'
+                          detail.entities[0].includes('过敏') || detail.entities[0].includes('诊断') || detail.entities[0].includes('病历') ? '健康信息' :
+                          detail.entities[0].includes('银行') || detail.entities[0].includes('账号') ? '金融信息' :
+                          detail.entities[0].includes('车牌') ? '车辆信息' :
+                          detail.entities[0].includes('姓名') ? '个人身份' :
+                          detail.entities[0].includes('公司') || detail.entities[0].includes('单位') ? '组织信息' :
+                          detail.entities[0].includes('日期') || detail.entities[0].includes('生日') ? '时间信息' :
+                          detail.entities[0].includes('照片') || detail.entities[0].includes('图像') ? '生物特征' :
+                          detail.entities[0].includes('社交') ? '社交关系' :
+                          '敏感信息'
                         }}
                       </div>
                     </div>
@@ -133,10 +138,19 @@
                              :class="detail.risk_level">
                           <span class="entity-icon">{{ 
                             entity.includes('身份证') ? '🆔' :
-                            entity.includes('电话') ? '📱' :
+                            entity.includes('电话') || entity.includes('手机') ? '📱' :
                             entity.includes('地址') ? '📍' :
-                            entity.includes('过敏') ? '🏥' :
-                            '�'
+                            entity.includes('过敏') || entity.includes('诊断') || entity.includes('病历') ? '🏥' :
+                            entity.includes('邮箱') ? '📧' :
+                            entity.includes('银行') || entity.includes('账号') ? '💳' :
+                            entity.includes('护照') ? '🛂' :
+                            entity.includes('车牌') ? '🚗' :
+                            entity.includes('姓名') ? '👤' :
+                            entity.includes('公司') || entity.includes('单位') ? '🏢' :
+                            entity.includes('日期') || entity.includes('生日') ? '📅' :
+                            entity.includes('照片') || entity.includes('图像') ? '🖼️' :
+                            entity.includes('社交') ? '💬' :
+                            '🔒'
                           }}</span>
                           <span class="entity-text">{{ entity }}</span>
                         </div>
@@ -224,29 +238,11 @@ const typeSpeed = 50  // 打字速度（毫秒/字符）
 const stepDelay = 800  // 每个步骤之间的延迟（毫秒）
 
 // 渲染模型选项
-const renderModelLabel = (option) => {
-  if (!option) return null
-  return option.label
-}
-
-const renderModelOption = (option) => {
-  if (!option) return null
-  return h('div', { class: 'model-option' }, [
-    h('div', { class: 'model-name' }, option.label),
-    h('div', { class: 'model-description' }, option.description)
-  ])
-}
-
 const modelOptions = [
   {
     label: 'DeepSeek (智能识别)',
     value: 'deepseek',
     description: '基于大模型的智能识别，适合复杂场景'
-  },
-  {
-    label: 'Presidio (规则识别)',
-    value: 'presidio',
-    description: '基于规则的快速识别，适合结构化文本'
   },
   {
     label: 'GPT-4 (高级识别)',
@@ -257,6 +253,11 @@ const modelOptions = [
     label: 'Claude (智能分析)',
     value: 'claude',
     description: '基于 Claude 的智能分析，擅长处理长文本和专业领域'
+  },
+  {
+    label: 'Presidio (规则分析)',
+    value: 'Presidio',
+    description: '基于 Presidio的规则分析，擅长处理结构化的规则文件'
   },
   {
     label: 'LLaMA2 (轻量级)',
@@ -429,35 +430,48 @@ const detectPII = async () => {
 
 .model-select-wrapper {
   margin-right: 16px;
-  min-width: 240px;
+  width: 240px;
 }
 
 .model-option {
-  padding: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
-.model-name {
+.model-option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-option-name {
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 4px;
+  color: var(--gpt-text);
 }
 
-.model-description {
+.model-option-desc {
   font-size: 12px;
-  color: #666;
+  color: var(--gpt-text-secondary);
+  opacity: 0.8;
   line-height: 1.4;
 }
 
+:deep(.n-select-menu) {
+  max-width: 240px !important;
+}
+
 :deep(.n-base-selection) {
-  min-width: 240px;
+  background: var(--n-color) !important;
+  min-width: 240px !important;
 }
 
 :deep(.n-base-selection-label) {
-  font-size: 14px;
+  font-size: 14px !important;
 }
 
-:deep(.n-select-menu) {
-  max-height: 400px;
+:deep(.n-base-selection-placeholder) {
+  font-size: 14px !important;
 }
 
 .header-actions {

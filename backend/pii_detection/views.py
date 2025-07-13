@@ -65,7 +65,7 @@ class PiiDetectView(APIView):
 
     def post(self, request):
         text = request.data.get("text", None)
-        model = request.data.get("model", "presidio")  # 默认使用presidio
+        model = request.data.get("model", "deepseek")  # 默认使用deepseek
         file = request.FILES.get('file', None)
         extracted_text = None
         
@@ -87,14 +87,9 @@ class PiiDetectView(APIView):
         knowledge_base_prompt = load_knowledge_base()
         
         # 根据选择的模型调用不同的检测方法
-        if model == "deepseek":
-            # 使用deepseek方法
-            from .deepseek_client import detect_pii_with_deepseek
-            result = detect_pii_with_deepseek(extracted_text)
-        else:
-            # 默认使用presidio方法
-            from .presidio_client import detect_pii_with_presidio
-            result = detect_pii_with_presidio(extracted_text)
+        # 使用deepseek方法
+        from .deepseek_client import detect_pii_with_deepseek
+        result = detect_pii_with_deepseek(extracted_text)
         
         logger.info(f"检测结果: {result}")
         record = PiiDetectionRecord.objects.create(

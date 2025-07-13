@@ -1,12 +1,13 @@
+import axios from 'axios';
+
 export function desensitizePII(text, entities = null) {
   return axios.post('/api/pii/desensitize/', {
     text,
     ...(entities ? { entities } : {})
   });
 }
-import axios from 'axios';
 
-export function detectPII(data, model = 'presidio') {
+export function detectPII(data, model = 'deepseek') {
   let requestData;
   if (data instanceof FormData) {
     requestData = data;
