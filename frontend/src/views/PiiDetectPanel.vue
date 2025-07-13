@@ -296,23 +296,26 @@ const typeWriter = async (target, text, speed = typeSpeed) => {
 }
 
 // 展示结果的动画序列
-const animateResults = async () => {
+const animateResults = async (skipText = false) => {
   if (!piiResult.value) return
   
   isTyping.value = true
   currentStep.value = 0
   
-  // 清空所有显示
-  displayedText.value = ''
+  // 清空分析结果显示
   displayedSummary.value = { risk_level: '', total_entities: 0, overall_reason: '' }
   displayedDetails.value = []
   
-  try {
+  // 只在需要时清空并显示文本
+  if (!skipText) {
+    displayedText.value = ''
     // 步骤1: 显示原始文本
     currentStep.value = 1
     await typeWriter(displayedText, piiResult.value.text)
     await new Promise(resolve => setTimeout(resolve, stepDelay))
-    
+  }
+  
+  try {
     // 步骤2: 显示风险概览
     if (piiResult.value.summary) {
       currentStep.value = 2
@@ -360,20 +363,33 @@ const detectPII = async () => {
   if (!inputText.value || loading.value) return
 
   loading.value = true
+  // 立即显示原始文本
+  const originalText = inputText.value
+  inputText.value = ''
+  
   try {
-    const response = await apiDetectPII(inputText.value, selectedModel.value)
-    piiResult.value = response.data
-    inputText.value = ''
+    // 立即设置并显示原始文本
+    piiResult.value = {
+      text: originalText,
+      summary: null,
+      details: []
+    }
+    displayedText.value = originalText
     
-    // 开始动画展示结果
-    await animateResults()
-    
-    // 滚动到底部
+    // 滚动到底部以显示原始文本
     setTimeout(() => {
       if (messagesRef.value) {
         messagesRef.value.scrollTop = messagesRef.value.scrollHeight
       }
     }, 100)
+    
+    // 发送请求并等待响应
+    const response = await apiDetectPII(originalText, selectedModel.value)
+    piiResult.value = response.data
+    
+    // 开始动画展示分析结果
+    await animateResults(true)  // true 表示跳过原始文本显示
+    
   } catch (error) {
     console.error('PII detection failed:', error)
   } finally {
