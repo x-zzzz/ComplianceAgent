@@ -39,21 +39,27 @@ git clone https://github.com/itachiliu/ComplianceAgent.git
 
 # 进入项目目录
 cd ComplianceAgent
-
-# 配置大模型API Key
-创建.env文件，补充自己的deepseek API Key.
-DEEPSEEK_API_KEY = "your API Key"
-
-
-# 执行命令
-```bash
-docker-compose up --build 
 ```
 
-# 编译成功后访问
+配置大模型 API Key：  
+创建 `.env` 文件，并补充自己的 DeepSeek API Key，内容如下：
+
+```env
+DEEPSEEK_API_KEY=your_api_key_here
+```
+
+执行构建并启动服务：
+
 ```bash
+docker-compose up --build
+```
+
+编译成功后，在浏览器访问：
+
+```
 http://localhost:8080
 ```
+
 
 ## 🗂 项目结构（Project Structure）
 
