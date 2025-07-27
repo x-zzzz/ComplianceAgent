@@ -42,9 +42,8 @@ cd ComplianceAgent
 
 # 配置大模型API Key
 创建.env文件，补充自己的deepseek API Key.
-```bash
 DEEPSEEK_API_KEY = "your API Key"
-```
+
 
 # 执行命令
 ```bash
