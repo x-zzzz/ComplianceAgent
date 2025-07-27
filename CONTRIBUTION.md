@@ -1,0 +1,105 @@
+# 🤝 贡献指南（Contributing Guide）
+
+感谢你关注并参与 **Compliance Wizard** 项目！
+
+我们欢迎任何形式的贡献，包括但不限于：
+
+- 提出 issue
+- 报告 bug
+- 提交功能或修复 PR
+- 优化文档
+- 提供使用反馈和建议
+
+---
+
+## 🧾 在开始之前
+
+在贡献代码或提交问题之前，请确保你已经：
+
+1. 阅读并理解我们的项目目标与结构（见 [README.md](./README.md)）；
+2. 同意遵守本项目的 [许可证](./LICENSE)；
+3. 阅读本贡献指南，并遵循下列流程与规范。
+
+---
+
+## 🛠 本地开发环境配置
+
+```bash
+# 克隆仓库
+git clone https://github.com/itachiliu/ComplianceAgent.git
+
+# 进入项目目录
+cd ComplianceAgent
+
+# 启动服务（需预先安装 Docker 和 Docker Compose）
+docker-compose up --build
+
+# 🚧 提交代码流程（Code Submission Workflow）
+
+欢迎你参与 DataGuardian AI 的开发工作！请遵循以下流程提交你的代码：
+
+## 1. Fork 仓库
+
+点击 GitHub 项目的右上角 “Fork” 按钮，将仓库复制到你自己的账户下。
+
+## 2. 创建新分支
+
+请基于 `main` 分支进行开发，命名建议格式如下：
+
+```bash
+git checkout -b feature/your-feature-name
+# 或修复问题
+git checkout -b fix/issue-123
+
+
+# 📐 代码规范（Code Style Guide）
+
+为保持代码质量一致性，请遵守以下编码规范：
+
+## 前端规范
+
+- 使用 **ESLint + Prettier** 保持代码整洁；
+- 组件命名使用大驼峰（PascalCase）；
+- 函数与变量使用小驼峰（camelCase）；
+- 每个组件尽量职责单一；
+- 推荐使用 Vue3 / React + TypeScript。
+
+## 后端规范（Python）
+
+- 使用 **Black** 进行自动格式化；
+- 遵守 PEP8 代码规范；
+- 函数应包含简洁明了的 Docstring 说明；
+- 路由、控制器、服务层分离明确。
+
+## 提交规范（Conventional Commits）
+
+请使用以下提交类型：
+
+- `feat:` 新功能
+- `fix:` 修复 bug
+- `docs:` 文档更新
+- `style:` 格式更改，不影响功能
+- `refactor:` 代码重构
+- `test:` 添加或更新测试
+- `chore:` 其他杂项
+
+示例：
+
+```bash
+git commit -m "feat: 添加个人信息识别模块"
+```
+
+## 注释要求
+重要逻辑请添加中文或英文注释；
+
+每个模块应具备说明性头注释（包括用途、作者、时间）。
+
+## 命名建议
+
+
+| 类型     | 命名规则         | 示例               |
+|----------|------------------|--------------------|
+| 变量     | camelCase        | `userToken`        |
+| 常量     | UPPER_SNAKE_CASE | `MAX_LENGTH`       |
+| 类/组件 | PascalCase       | `RiskAssessmentUI` |
+| 函数     | camelCase        | `getReportData()`  |
