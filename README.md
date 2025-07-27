@@ -45,10 +45,12 @@ cd ComplianceAgent
 ```bash
 DEEPSEEK_API_KEY="(your API Key)"
 ```
+
 # 执行命令
 ```bash
 docker-compose up --build 
 ```
+
 # 编译成功后访问
 ```bash
 http://localhost:8080
