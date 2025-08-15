@@ -37,7 +37,7 @@
 
 **输出参数**：结构化文本，命令方式以文件名+时间戳的形式存储
 
-**输出路径**：[病例文本_时间戳](./../../backend/knowledge_base/text/)
+**输出路径**：[病例文本_时间戳](./../../backend/knowledge_base/text/)，文件放在/backend/knowledge_base/text/ 下，如果不存在就创建
 
 
 
