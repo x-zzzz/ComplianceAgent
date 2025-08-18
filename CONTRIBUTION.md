@@ -24,9 +24,11 @@
 
 ## 🛠 本地开发环境配置
 
-```bash
+
 # 克隆仓库
+```bash
 git clone https://github.com/itachiliu/ComplianceAgent.git
+```
 
 # 进入项目目录
 cd ComplianceAgent
@@ -48,6 +50,8 @@ docker-compose up --build
 
 ```bash
 git checkout -b feature/your-feature-name
+```
+
 # 或修复问题
 git checkout -b fix/issue-123
 
